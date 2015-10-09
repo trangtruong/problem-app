@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module SYSTEM "module.dtd" >
+<module>
+  <name>config-app</name>
+  <displayName>${project.name}</displayName>
+  <description>${project.description}</description>
+  <class>info.magnolia.configuration.ConfigAppModule</class>
+  <versionHandler>info.magnolia.configuration.app.setup.ConfigAppModuleVersionHandler</versionHandler>
+  <version>${project.version}</version>
+
+  <components>
+    <id>subapp</id>
+      <!--Sub app overview-->
+      <component>
+        <type>info.magnolia.configuration.app.overview.ConfigOverviewView</type>
+        <implementation>info.magnolia.configuration.app.overview.ConfigOverviewViewImpl</implementation>
+      </component>
+
+      <component>
+        <type>info.magnolia.configuration.app.overview.toolbar.ToolbarPresenter</type>
+        <implementation>info.magnolia.configuration.app.overview.toolbar.ToolbarPresenter</implementation>
+      </component>
+
+      <component>
+        <type>info.magnolia.configuration.app.overview.toolbar.ToolbarView</type>
+        <implementation>info.magnolia.configuration.app.overview.toolbar.ToolbarViewImpl</implementation>
+      </component>
+
+      <!--Sub app problem-->
+      <component>
+        <type>info.magnolia.configuration.app.problem.ConfigProblemView</type>
+        <implementation>info.magnolia.configuration.app.problem.ConfigProblemViewImpl</implementation>
+      </component>
+
+      <component>
+        <type>info.magnolia.configuration.app.problem.ConfigProblemSubApp</type>
+        <implementation>info.magnolia.configuration.app.problem.ConfigProblemSubApp</implementation>
+      </component>
+
+      <component>
+        <type>info.magnolia.configuration.app.ConfigBaseApp</type>
+        <implementation>info.magnolia.configuration.app.ConfigBaseApp</implementation>
+      </component>
+
+
+  </components>
+
+  <dependencies>
+    <dependency>
+      <name>core</name>
+      <version>5.4-SNAPSHOT/*</version>
+    </dependency>
+
+    <dependency>
+      <name>ui-contentapp</name>
+      <version>5.4-SNAPSHOT/*</version>
+    </dependency>
+  </dependencies>
+</module>

@@ -1,0 +1,118 @@
+.config-layout {
+    background-color: #d1d1d1;
+}
+
+.toggle-button {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+}
+
+.v-table-cell-content-center-aligned > .v-table-cell-wrapper {
+    text-align: center !important;
+}
+
+.header {
+    background-color: white;
+    border-bottom: 1px solid #E0E0E0;
+    padding-top: 5px;
+    font-weight: normal;
+    line-height: 30px;
+    padding-left: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+.header *:focus {
+    outline: none;
+}
+.toolbar-layout[width-range~="0-1000px"] .caption-label {
+    display: none;
+}
+
+.toolbar-layout[width-range~="0-1000px"] .v-filterselect {
+    width: 100px !important;
+}
+
+.toolbar-layout[width-range~="0-1000px"] .v-filterselect-input {
+    min-width: 100px;
+}
+
+.toolbar-layout[width-range~="1000-1200px"] .caption-label {
+    font-size: 10px;
+}
+
+.toolbar-layout {
+    background-color: #d1d1d1;
+    overflow: hidden;
+}
+
+.toolbar-layout .entry {
+    background-color: #e0e0e0;
+    border: 1px solid #c1c1c1;
+}
+
+.toolbar-layout .caption-label {
+    color: #000000;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.config-layout.v-margin-bottom, .config-layout .v-margin-bottom {
+    padding-bottom: 5px;
+}
+
+.config-layout.v-margin-top, .config-layout .v-margin-top {
+    padding-top: 5px;
+}
+
+.config-layout.v-margin-left .config-layout .v-margin-left {
+    padding-left: 5px;
+}
+
+.config-layout.v-margin-right .config-layout .v-margin-right {
+    padding-right: 5px;
+}
+
+.config-layout.item .caption-label {
+    display: inline-block;
+    padding-right: 5px;
+}
+
+.config-layout .v-selection-cb {
+    display: none;
+}
+
+.grouper {
+    width: 100%;
+}
+
+.file-browser-layout {
+    background-color: #e0e0e0;
+    border: 2px solid #c1c1c1;
+}
+
+.v-table-row.italic, .v-table-row.italic {
+    font-style: italic;
+}
+
+.v-table-row.invalid .v-table-icon-element, .v-table-row-odd.invalid .v-table-icon-element {
+    color: #9a3332;
+}
+/*.v-table-generated-row .v-table-cell-wrapper {*/
+    /*border-bottom: 1px solid #E0E0E0;*/
+    /*font-weight: bold;*/
+/*}*/
+
+/*.v-table-generated-row .gwt-CheckBox {*/
+    /*display: none;*/
+/*}*/
+
+/*.v-table-generated-row .v-table-cell-wrapper {*/
+    /*padding-left: 0 !important;*/
+/*}*/
+
+/*.v-table-generated-row .v-table-cell-content {*/
+    /*border: none !important;*/
+/*}*/
