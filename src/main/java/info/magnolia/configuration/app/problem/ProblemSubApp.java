@@ -42,6 +42,7 @@ import info.magnolia.configuration.app.overview.filebrowser.FileBrowserHelper;
 import info.magnolia.configuration.app.overview.toolbar.FilterContext;
 import info.magnolia.configuration.app.problem.data.ProblemContainer;
 import info.magnolia.configuration.app.problem.toolbar.ProblemToolbarPresenter;
+import info.magnolia.i18nsystem.SimpleTranslator;
 import info.magnolia.module.ModuleRegistry;
 import info.magnolia.module.model.ModuleDefinition;
 import info.magnolia.resourceloader.ResourceOrigin;
@@ -50,6 +51,7 @@ import info.magnolia.ui.api.location.LocationController;
 import info.magnolia.ui.framework.app.BaseSubApp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +71,6 @@ import com.google.common.collect.Maps;
  */
 public class ProblemSubApp extends BaseSubApp<ProblemView> implements ProblemPresenter {
 
-    public static final String NO_DEFINITIONS_SELECTED = "No definitions selected";
     private final ResourceOrigin origin;
 
     private final ModuleRegistry moduleRegistry;
@@ -92,13 +93,15 @@ public class ProblemSubApp extends BaseSubApp<ProblemView> implements ProblemPre
 
     private FileBrowserHelper fileBrowserHelper;
 
+    private SimpleTranslator i18n;
+
     @Inject
     public ProblemSubApp(
             SubAppContext subAppContext,
             ProblemView view, ModuleRegistry moduleRegistry,
             RegistryFacade registryFacade,
             ProblemToolbarPresenter toolbarPresenter,
-            ResourceOrigin origin, final LocationController locationController) {
+            ResourceOrigin origin, final LocationController locationController, SimpleTranslator i18n) {
         super(subAppContext, view);
         this.moduleRegistry = moduleRegistry;
         this.registryFacade = registryFacade;
@@ -107,6 +110,7 @@ public class ProblemSubApp extends BaseSubApp<ProblemView> implements ProblemPre
         this.fileBrowserHelper = new FileBrowserHelper(getSubAppContext());
         this.origin = origin;
         this.container = new ProblemContainer();
+        this.i18n = i18n;
     }
 
     @Override
@@ -175,7 +179,7 @@ public class ProblemSubApp extends BaseSubApp<ProblemView> implements ProblemPre
         }
 
         getView().setDataSource(container.createDataSource(problems));
-        getView().setStatus(NO_DEFINITIONS_SELECTED);//TODO: Implement code for update status
+        getView().setStatus(createStatus(problems));
         currentLocation = null;
 
         getView().refresh();
@@ -204,5 +208,14 @@ public class ProblemSubApp extends BaseSubApp<ProblemView> implements ProblemPre
         }
 
         return true;
+    }
+
+    private String createStatus(ListMultimap<String, Problem> problems) {
+        List<String> status = new ArrayList<String>();
+        for (String problemType : problems.keySet()) {
+            status.add(i18n.translate("problem.group.message", problems.get(problemType).size(), problemType));
+        }
+
+        return StringUtils.join(status, ", ");
     }
 }

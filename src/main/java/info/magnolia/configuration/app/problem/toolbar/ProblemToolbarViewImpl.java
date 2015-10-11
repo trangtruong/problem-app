@@ -82,6 +82,9 @@ public class ProblemToolbarViewImpl extends HorizontalLayout implements ProblemT
         @Override
         public void valueChange(Property.ValueChangeEvent event) {
             callback.updateGroupBy();
+            if (groupByLayout.getComponentCount() > 1) {
+                groupByLayout.getComponent(1).setVisible(getGroupBy() == ProblemView.SourceType.severity);
+            }
         }
     };
 
@@ -158,11 +161,14 @@ public class ProblemToolbarViewImpl extends HorizontalLayout implements ProblemT
 
         groupByLayout.setSizeUndefined();
 
-        groupByLayout.addComponent(decorateComponent("Group by:", groupBySelect));
-        groupByLayout.addComponent(decorateComponent("From:", fromSelect));
+        groupByLayout.addComponent(decorateComponent(i18n.translate("toolbar.groupBy.label"), groupBySelect));
+        Component formField = decorateComponent(i18n.translate("toolbar.fromSource.label"), fromSelect);
+        formField.setVisible(false);
+        groupByLayout.addComponent(formField);
 
         groupByLayout.addStyleName("entry");
         groupByLayout.setMargin(true);
+        groupByLayout.setSpacing(true);
 
         addComponent(groupByLayout);
     }

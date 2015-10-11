@@ -123,3 +123,29 @@
     height: auto !important;
     white-space: normal !important;
 }
+
+.problem-layout .v-table-generated-row .v-table-cell-wrapper {
+    padding-left: 0 !important;
+    height: 30px !important;
+    font-weight: bold;
+}
+
+.problem-layout .v-table-generated-row .v-table-cell-wrapper:empty:after {
+    display: none;
+}
+
+.problem-layout .v-table-generated-row .v-table-cell-content {
+    border-bottom: 1px solid #848484;
+    padding-top: 10px;
+}
+
+.problem-layout .v-table-generated-row,
+.problem-layout tr.v-table-generated-row.v-selected .v-table-cell-content,
+.problem-layout tr.v-table-generated-row .v-table-cell-content-sorted {
+    background: none !important;
+    color: initial;
+}
+
+.problem-layout .v-selection-cb {
+    display: inline-block;
+}

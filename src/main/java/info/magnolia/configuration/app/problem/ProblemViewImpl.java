@@ -81,7 +81,7 @@ public class ProblemViewImpl extends VerticalLayout implements ProblemView {
     }
 
     private void initLayout() {
-        layout.setStyleName("pulse problem-layout");
+        layout.addStyleName("problem-layout");
         layout.setMargin(true);
         layout.setSizeFull();
         layout.addComponent(treeTable);
@@ -94,18 +94,21 @@ public class ProblemViewImpl extends VerticalLayout implements ProblemView {
         treeTable.addStyleName("message-table");
         treeTable.setSelectable(true);
         treeTable.setMultiSelect(true);
+        treeTable.setSortEnabled(false);
 
         treeTable.setRowGenerator(groupingRowGenerator);
 
         // Columns formatter
         treeTable.addGeneratedColumn(ProblemConstants.TYPE_PID, new TypeColumnGenerator());
-        treeTable.setColumnWidth(ProblemConstants.TYPE_PID, 30);
+        treeTable.setColumnWidth(ProblemConstants.TYPE_PID, 60);
         treeTable.addGeneratedColumn(ProblemConstants.PROBLEM_PID, new ProblemColumnGenerator());
-        treeTable.setColumnWidth(ProblemConstants.PROBLEM_PID, 450);
+        treeTable.setColumnExpandRatio(ProblemConstants.PROBLEM_PID, 1f);
         treeTable.addGeneratedColumn(ProblemConstants.SOURCE_PID, new SourceItemColumnGenerator());
         treeTable.setColumnWidth(ProblemConstants.SOURCE_PID, 100);
         treeTable.addGeneratedColumn(ProblemConstants.TIMESTAMP_PID, new DateColumnFormatter(null));
-        treeTable.setColumnWidth(ProblemConstants.TIMESTAMP_PID, 150);
+        treeTable.setColumnWidth(ProblemConstants.TIMESTAMP_PID, 200);
+        treeTable.setColumnWidth(ProblemConstants.ELEMENT_PID, 100);
+        treeTable.setColumnWidth(ProblemConstants.MODULE_PID, 100);
     }
 
     @Override
@@ -117,7 +120,11 @@ public class ProblemViewImpl extends VerticalLayout implements ProblemView {
     public void setDataSource(Container dataSource) {
         treeTable.setContainerDataSource(dataSource);
         treeTable.setVisibleColumns(ProblemConstants.PID_ORDER);
-        treeTable.setColumnHeaders("", "Problem", "Element", "Module", "Source", "Timestamp");
+        treeTable.setColumnHeaders("", i18n.translate("problem.browser.column.problem"),
+                i18n.translate("problem.browser.column.element"),
+                i18n.translate("problem.browser.column.module"),
+                i18n.translate("problem.browser.column.source"),
+                i18n.translate("problem.browser.column.time"));
     }
 
     @Override
@@ -137,7 +144,6 @@ public class ProblemViewImpl extends VerticalLayout implements ProblemView {
 
     @Override
     public void refresh() {
-        treeTable.sort();
     }
 
     /*
@@ -155,7 +161,7 @@ public class ProblemViewImpl extends VerticalLayout implements ProblemView {
                     String groupValue = StringUtils.removeStart((String) item.getItemProperty(ProblemConstants.PROBLEM_PID).getValue(), ProblemConstants.GROUP_PLACEHOLDER_ITEM_ID);
                     String problemType = StringUtils.substringBefore(groupValue, ProblemConstants.NUMBER_ITEM_SEPARATOR);
                     String numberOfProblems = StringUtils.substringAfter(groupValue, ProblemConstants.NUMBER_ITEM_SEPARATOR);
-                    row.setText(getI18n().translate("problem.group.message", numberOfProblems, problemType));
+                    row.setText(" ", getI18n().translate("problem.group.message", numberOfProblems, problemType));
 
                     return row;
                 }
