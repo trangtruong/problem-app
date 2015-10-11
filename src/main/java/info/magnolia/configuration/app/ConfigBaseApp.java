@@ -51,11 +51,13 @@ import org.slf4j.LoggerFactory;
 public class ConfigBaseApp extends BaseApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigBaseApp.class);
+
     @Inject
     protected ConfigBaseApp(AppContext appContext, AppView view) {
         super(appContext, view);
     }
 
+    @Override
     public void start(Location location) {
         Map<String, SubAppDescriptor> map = getAppContext().getAppDescriptor().getSubApps();
         for (String subAppName : map.keySet()) {

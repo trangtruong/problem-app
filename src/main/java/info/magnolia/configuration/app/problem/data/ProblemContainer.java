@@ -35,85 +35,63 @@
 package info.magnolia.configuration.app.problem.data;
 
 import info.magnolia.config.source.Problem;
-import info.magnolia.configuration.app.overview.data.ConfigConstants;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.google.common.collect.ListMultimap;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.HierarchicalContainer;
 
-public class ProblemContainer<T> {
+public class ProblemContainer implements Serializable {
 
-    protected boolean grouping = false;
-    protected HierarchicalContainer container;
+    private HierarchicalContainer container;
 
-    public HierarchicalContainer createDataSource(List<Problem> messages) {
+    public HierarchicalContainer createDataSource(ListMultimap<String, Problem> problems) {
         container = new HierarchicalContainer();
-        container.addContainerProperty(ConfigConstants.PROBLEM_PID, String.class, null);
-        container.addContainerProperty(ConfigConstants.TYPE_PID, Problem.Type.class, null);
-        container.addContainerProperty(ConfigConstants.ELEMENT_PID, String.class, null);
-        container.addContainerProperty(ConfigConstants.MODULE_PID, String.class, null);
-        container.addContainerProperty(ConfigConstants.SOURCE_PID, Problem.SourceType.class, null);
-        container.addContainerProperty(ConfigConstants.TIMESTAMP_PID, Date.class, null);
+        container.addContainerProperty(ProblemConstants.PROBLEM_PID, String.class, null);
+        container.addContainerProperty(ProblemConstants.TYPE_PID, Problem.Type.class, null);
+        container.addContainerProperty(ProblemConstants.ELEMENT_PID, String.class, null);
+        container.addContainerProperty(ProblemConstants.MODULE_PID, String.class, null);
+        container.addContainerProperty(ProblemConstants.SOURCE_PID, Problem.SourceType.class, null);
+        container.addContainerProperty(ProblemConstants.TIMESTAMP_PID, Date.class, null);
 
-        createSuperItems();
+        initProblemsTree(problems);
 
-        for (int i = 0 ; i < messages.size(); i++) {
-            addBeanAsItem(messages.get(i), i);
-        }
-
-        buildTree();
         return container;
     }
 
-    protected void createSuperItems() {
-        for (Problem.SourceType type : Problem.SourceType.values()) {
-            Object itemId = getSuperItem(type);
-            Item item = container.addItem(itemId);
-            item.getItemProperty(ConfigConstants.SOURCE_PID).setValue(type);
-            container.setChildrenAllowed(itemId, true);
-        }
-    }
+    private void initProblemsTree(ListMultimap<String, Problem> problems) {
+        for (String type : problems.keySet()) {
+            List<Problem> groupedProblems = problems.get(type);
 
-    private Object getSuperItem(Problem.SourceType type) {
-        return ConfigConstants.GROUP_PLACEHOLDER_ITEMID + type;
-    }
+            Object groupItemId = getGroupItem(type);
+            Item groupItem = container.addItem(groupItemId);
+            groupItem.getItemProperty(ProblemConstants.PROBLEM_PID).setValue(type + ProblemConstants.NUMBER_ITEM_SEPARATOR + groupedProblems.size());
+            container.setChildrenAllowed(groupItemId, false);
 
-    public void addBeanAsItem(Problem message, int i) {
-        final Item item = container.addItem(i);
-        container.setChildrenAllowed(i, false);
-        assignPropertiesFromBean(message, item);
-    }
-
-    public void assignPropertiesFromBean(Problem message, Item item) {
-        if (item != null && message != null) {
-            item.getItemProperty(ConfigConstants.PROBLEM_PID).setValue(message.getMessage());
-            item.getItemProperty(ConfigConstants.TYPE_PID).setValue(message.getType());
-            item.getItemProperty(ConfigConstants.ELEMENT_PID).setValue(message.getElement());
-            item.getItemProperty(ConfigConstants.MODULE_PID).setValue("");
-            item.getItemProperty(ConfigConstants.SOURCE_PID).setValue(message.getSourceType());
-            item.getItemProperty(ConfigConstants.TIMESTAMP_PID).setValue((message.getTimestamp()));
-        }
-    }
-
-    /*
-     * Assign messages under correct parents so that
-     * grouping works.
-    */
-    public void buildTree() {
-
-        for (Object itemId : container.getItemIds()) {
-            // Skip super items
-            if (!itemId.toString().startsWith(ConfigConstants.GROUP_PLACEHOLDER_ITEMID)) {
-                Item item = container.getItem(itemId);
-                Problem.SourceType type = (Problem.SourceType) item.getItemProperty(ConfigConstants.SOURCE_PID).getValue();
-                Object parentItemId = getSuperItem(type);
-                Item parentItem = container.getItem(parentItemId);
-                if (parentItem != null) {
-                    container.setParent(itemId, parentItemId);
-                }
+            for (Problem problem : groupedProblems) {
+                Object itemId = container.addItem();
+                container.setChildrenAllowed(itemId, false);
+                container.setParent(itemId, groupItemId);
+                assignPropertiesFromBean(problem, container.getItem(itemId));
             }
+        }
+    }
+
+    private Object getGroupItem(String type) {
+        return ProblemConstants.GROUP_PLACEHOLDER_ITEM_ID + type;
+    }
+
+    public void assignPropertiesFromBean(Problem problem, Item item) {
+        if (item != null && problem != null) {
+            item.getItemProperty(ProblemConstants.PROBLEM_PID).setValue(problem.getMessage());
+            item.getItemProperty(ProblemConstants.TYPE_PID).setValue(problem.getType());
+            item.getItemProperty(ProblemConstants.ELEMENT_PID).setValue(problem.getElement());
+            item.getItemProperty(ProblemConstants.MODULE_PID).setValue("");//TODO add module
+            item.getItemProperty(ProblemConstants.SOURCE_PID).setValue(problem.getSourceType());
+            item.getItemProperty(ProblemConstants.TIMESTAMP_PID).setValue((problem.getTimestamp()));
         }
     }
 }

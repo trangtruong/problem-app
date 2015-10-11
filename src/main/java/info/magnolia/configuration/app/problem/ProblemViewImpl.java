@@ -35,10 +35,10 @@ package info.magnolia.configuration.app.problem;
 
 import info.magnolia.config.source.Problem;
 import info.magnolia.configuration.app.overview.ConfigOverviewLayout;
-import info.magnolia.configuration.app.overview.data.ConfigConstants;
-import info.magnolia.configuration.app.overview.toolbar.ToolbarView;
+import info.magnolia.configuration.app.problem.data.ProblemConstants;
+import info.magnolia.configuration.app.problem.toolbar.ProblemToolbarView;
 import info.magnolia.i18nsystem.SimpleTranslator;
-import info.magnolia.ui.vaadin.grid.MagnoliaTreeTable;
+import info.magnolia.ui.vaadin.grid.MagnoliaTable;
 import info.magnolia.ui.workbench.column.DateColumnFormatter;
 
 import javax.inject.Inject;
@@ -52,29 +52,25 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Implementation of {@link info.magnolia.configuration.app.problem.ConfigProblemView}.
+ * Implementation of {@link info.magnolia.configuration.app.problem.ProblemView}.
  */
-public class ConfigProblemViewImpl implements ConfigProblemView {
-
-    public static final String GREEN = "green";
-    public static final String RED = "red";
+public class ProblemViewImpl extends VerticalLayout implements ProblemView {
 
     private VerticalLayout layout = new ConfigOverviewLayout();
 
-    private Presenter presenter;
+    private ProblemPresenter presenter;
 
-    private TreeTable treeTable = new MagnoliaTreeTable();
+    private Table treeTable = new MagnoliaTable();
 
     private Label statusLabel = new Label("", ContentMode.HTML);
 
     private SimpleTranslator i18n;
 
     @Inject
-    public ConfigProblemViewImpl(SimpleTranslator i18n) {
+    public ProblemViewImpl(SimpleTranslator i18n) {
         this.i18n = i18n;
         initLayout();
         initTreeTable();
@@ -85,6 +81,7 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
     }
 
     private void initLayout() {
+        layout.setStyleName("pulse problem-layout");
         layout.setMargin(true);
         layout.setSizeFull();
         layout.addComponent(treeTable);
@@ -97,31 +94,18 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
         treeTable.addStyleName("message-table");
         treeTable.setSelectable(true);
         treeTable.setMultiSelect(true);
-        treeTable.setHeight("100%");
-        for (Object itemId : treeTable.getItemIds()) {
-            treeTable.setCollapsed(itemId, false);
-        }
-    }
 
-    @Override
-    public Table.GeneratedRow generateGroupingRow(Item item) {
-        Table.GeneratedRow row = new Table.GeneratedRow();
-        Problem.SourceType messageType = (Problem.SourceType) item.getItemProperty(ConfigConstants.SOURCE_PID).getValue();
+        treeTable.setRowGenerator(groupingRowGenerator);
 
-        String key = null;
-        switch (messageType) {
-        case classpath:
-            key = "Classpath";
-            break;
-        case JCR:
-            key = "JCR";
-            break;
-        default:
-            return null;
-        }
-
-        row.setText(getI18n().translate(key));
-        return row;
+        // Columns formatter
+        treeTable.addGeneratedColumn(ProblemConstants.TYPE_PID, new TypeColumnGenerator());
+        treeTable.setColumnWidth(ProblemConstants.TYPE_PID, 30);
+        treeTable.addGeneratedColumn(ProblemConstants.PROBLEM_PID, new ProblemColumnGenerator());
+        treeTable.setColumnWidth(ProblemConstants.PROBLEM_PID, 450);
+        treeTable.addGeneratedColumn(ProblemConstants.SOURCE_PID, new SourceItemColumnGenerator());
+        treeTable.setColumnWidth(ProblemConstants.SOURCE_PID, 100);
+        treeTable.addGeneratedColumn(ProblemConstants.TIMESTAMP_PID, new DateColumnFormatter(null));
+        treeTable.setColumnWidth(ProblemConstants.TIMESTAMP_PID, 150);
     }
 
     @Override
@@ -129,39 +113,53 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
         return layout;
     }
 
-    @Override public void setDataSource(Container dataSource) {
+    @Override
+    public void setDataSource(Container dataSource) {
         treeTable.setContainerDataSource(dataSource);
-        treeTable.setVisibleColumns(ConfigConstants.PROBLEM_ID_ORDER);
-        treeTable.setColumnHeaders("Problem", "Element",  "Module", "Source", "Timestamp");
-        treeTable.setRowGenerator(groupingRowGenerator);
-        treeTable.setCollapsed(ConfigConstants.PROBLEM_ID_ORDER, false);
+        treeTable.setVisibleColumns(ProblemConstants.PID_ORDER);
+        treeTable.setColumnHeaders("", "Problem", "Element", "Module", "Source", "Timestamp");
+    }
 
+    @Override
+    public void setPresenter(ProblemPresenter presenter) {
+        this.presenter = presenter;
+    }
 
-        //Columns formatter
-        treeTable.addGeneratedColumn(ConfigConstants.PROBLEM_PID, new ProblemColumnGenerator());
-        treeTable.setColumnWidth(ConfigConstants.PROBLEM_PID, 450);
-        treeTable.addGeneratedColumn(ConfigConstants.SOURCE_PID, new SourceItemColumnGenerator());
-        treeTable.setColumnWidth(ConfigConstants.SOURCE_PID, 100);
-        treeTable.addGeneratedColumn(ConfigConstants.TIMESTAMP_PID, new DateColumnFormatter(null));
-        treeTable.setColumnWidth(ConfigConstants.TIMESTAMP_PID, 150);
+    @Override
+    public void setStatus(String location) {
+        statusLabel.setValue(location);
+    }
+
+    @Override
+    public void setToolbar(ProblemToolbarView toolbarView) {
+        layout.addComponentAsFirst(toolbarView.asVaadinComponent());
+    }
+
+    @Override
+    public void refresh() {
+        treeTable.sort();
     }
 
     /*
-     * Row generator draws grouping headers if such are present in container
-     */
+* Row generator draws grouping headers if such are present in container
+*/
     private Table.RowGenerator groupingRowGenerator = new Table.RowGenerator() {
 
         @Override
         public Table.GeneratedRow generateRow(Table table, Object itemId) {
 
-            /*
-             * When sorting by type special items are inserted into Container to
-             * acts as a placeholder for grouping sub section. This row
-             * generator must render those special items.
-             */
-            if (itemId.toString().startsWith(ConfigConstants.GROUP_PLACEHOLDER_ITEMID)) {
+            if (itemId.toString().startsWith(ProblemConstants.GROUP_PLACEHOLDER_ITEM_ID)) {
+                Table.GeneratedRow row = new Table.GeneratedRow();
                 Item item = table.getItem(itemId);
-                return generateGroupingRow(item);
+                if (item.getItemProperty(ProblemConstants.PROBLEM_PID).getValue() != null) {
+                    String groupValue = StringUtils.removeStart((String) item.getItemProperty(ProblemConstants.PROBLEM_PID).getValue(), ProblemConstants.GROUP_PLACEHOLDER_ITEM_ID);
+                    String problemType = StringUtils.substringBefore(groupValue, ProblemConstants.NUMBER_ITEM_SEPARATOR);
+                    String numberOfProblems = StringUtils.substringAfter(groupValue, ProblemConstants.NUMBER_ITEM_SEPARATOR);
+                    row.setText(getI18n().translate("problem.group.message", numberOfProblems, problemType));
+
+                    return row;
+                }
+
             }
 
             return null;
@@ -171,16 +169,22 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
     /**
      * The Vaadin {@link Table.ColumnGenerator ColumnGenerator} for the subject cells in the messages list view.
      */
-    // default visibility for tests.
     class ProblemColumnGenerator implements Table.ColumnGenerator {
 
         @Override
         public Object generateCell(Table source, Object itemId, Object columnId) {
-
-            Problem.Type type = (Problem.Type) source.getContainerProperty(itemId, ConfigConstants.TYPE_PID).getValue();
             String text = (String) source.getContainerProperty(itemId, columnId).getValue();
+            return String.format("<span class=\"problem-message\">%s</span>", text);
+        }
+    }
 
-            if (StringUtils.isNotBlank(type.name()) && StringUtils.isNotBlank(text)) {
+    class TypeColumnGenerator implements Table.ColumnGenerator {
+
+        @Override
+        public Object generateCell(Table source, Object itemId, Object columnId) {
+
+            Problem.Type type = (Problem.Type) source.getContainerProperty(itemId, ProblemConstants.TYPE_PID).getValue();
+            if (type != null && StringUtils.isNotBlank(type.name())) {
 
                 String level, shape = "circle", mark;
                 switch (type) {
@@ -205,8 +209,8 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
                                 + "<span class=\"icon icon-shape-%2$s-plus\"></span>"
                                 + "<span class=\"icon icon-shape-%2$s\"></span>"
                                 + "<span class=\"icon %3$s\"></span>"
-                                + "</span>&nbsp%4$s",
-                        level, shape, mark, text);
+                                + "</span>",
+                        level, shape, mark);
             }
             return null;
         }
@@ -238,7 +242,7 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
                 return null;
             }
 
-            return String.format("<span class=\"icon %1$s\"></span>", icon);
+            return String.format("<span class=\"activation-status icon %1$s\"></span>", icon);
         }
     }
 
@@ -249,7 +253,7 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
 
         @Override
         public Object generateCell(Table source, Object itemId, Object columnId) {
-            Problem.SourceType messageType = (Problem.SourceType) source.getContainerProperty(itemId, ConfigConstants.SOURCE_PID).getValue();
+            Problem.SourceType messageType = (Problem.SourceType) source.getContainerProperty(itemId, ProblemConstants.SOURCE_PID).getValue();
 
             String level, shape = "circle", mark;
             switch (messageType) {
@@ -274,18 +278,4 @@ public class ConfigProblemViewImpl implements ConfigProblemView {
         }
     }
 
-    @Override
-    public void setPresenter(Presenter presenter) {
-        this.presenter = presenter;
-    }
-
-    @Override
-    public void setStatus(String location) {
-        statusLabel.setValue(location);
-    }
-
-    @Override
-    public void setToolbar(ToolbarView toolbarView) {
-        layout.addComponentAsFirst(toolbarView.asVaadinComponent());
-    }
 }

@@ -1,5 +1,5 @@
 /**
- * This file Copyright (c) 2014 Magnolia International
+ * This file Copyright (c) 2015 Magnolia International
  * Ltd.  (http://www.magnolia-cms.com). All rights reserved.
  *
  *
@@ -31,25 +31,17 @@
  * intact.
  *
  */
-package info.magnolia.configuration.app.overview.data;
+package info.magnolia.configuration.app.problem;
 
-/** * Constants used in the data binding structures of the config app.
+import info.magnolia.config.source.Problem;
+import info.magnolia.configuration.app.overview.ConfigPresenter;
 
- *
- * @see {@link DefinitionProviderConfigDataSource}.
+/**
+ * ConfigPresenter.
  */
-public class ConfigConstants {
+public interface ProblemPresenter extends ConfigPresenter {
 
-    public static final String TITLE_PID = "title";
+    void groupBy(ProblemView.SourceType sourceType, Problem.SourceType type);
 
-    public static final String MODULE_PID = "module";
-
-    public static final String TYPE_PID = "type";
-
-    public static final String VALUE_PID = "value";
-
-    public static final String ORIGIN_PID = "origin";
-
-    public static final String[] PID_ORDER = new String[] {TITLE_PID, VALUE_PID, TYPE_PID, MODULE_PID, ORIGIN_PID};
-
+    void searchBy(String searchExpression);
 }

@@ -31,47 +31,26 @@
  * intact.
  *
  */
-package info.magnolia.configuration.app.problem;
+package info.magnolia.configuration.app.problem.toolbar;
 
-import info.magnolia.configuration.app.overview.ConfigPresenter;
-import info.magnolia.configuration.app.overview.toolbar.ToolbarView;
+import info.magnolia.config.source.Problem;
+import info.magnolia.configuration.app.problem.ProblemView;
 import info.magnolia.ui.api.view.View;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.ui.Table;
-
 /**
- * Config problem sub-app view interface.
+ * ToolbarView.
  */
-public interface ConfigProblemView extends View {
+public interface ProblemToolbarView extends View {
 
-    void setDataSource(Container dataSource);
+    ProblemView.SourceType getGroupBy();
 
-    void setPresenter(Presenter presenter);
+    Problem.SourceType getFrom();
 
-    void setStatus(String location);
+    void setCallback(Callback callback);
 
-    void setToolbar(ToolbarView toolbarView);
+    interface Callback {
+        void updateGroupBy();
 
-    /**
-     * Possible problem data sorting options.
-     */
-    enum SourceType {
-        source,
-        severity,
+        void onSearch(String searchTextExpression);
     }
-
-    /**
-     * Presenter interface.
-     */
-    interface Presenter extends ConfigPresenter {
-
-        //void onSelectionChanged(Id value);
-    }
-
-    /**
-     * A row generator draws grouping headers if such are present in the container. Default implementation returns null.
-     */
-    Table.GeneratedRow generateGroupingRow(Item item);
 }

@@ -40,8 +40,8 @@ import info.magnolia.config.source.Problem;
 import info.magnolia.configuration.app.overview.ConfigOverviewView;
 import info.magnolia.configuration.app.overview.filebrowser.FileBrowserHelper;
 import info.magnolia.configuration.app.overview.toolbar.FilterContext;
-import info.magnolia.configuration.app.overview.toolbar.ToolbarPresenter;
 import info.magnolia.configuration.app.problem.data.ProblemContainer;
+import info.magnolia.configuration.app.problem.toolbar.ProblemToolbarPresenter;
 import info.magnolia.module.ModuleRegistry;
 import info.magnolia.module.model.ModuleDefinition;
 import info.magnolia.resourceloader.ResourceOrigin;
@@ -50,7 +50,6 @@ import info.magnolia.ui.api.location.LocationController;
 import info.magnolia.ui.framework.app.BaseSubApp;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -60,15 +59,15 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 
 /**
- * Problem config-app sub-app. Communicates with the {@link info.magnolia.configuration.app.problem.ConfigProblemView} via {@link info.magnolia.configuration.app.problem.ConfigProblemView.Presenter}
- * interface.
- *
+ * Problem config-app sub-app. Communicates with the {@link info.magnolia.configuration.app.problem.ProblemView} via {@link info.magnolia.configuration.app.problem.ProblemPresenter} interface.
  * Responsible for populating the data-source for the view's tabular components.
  */
-public class ConfigProblemSubApp extends BaseSubApp<ConfigProblemView> implements ConfigProblemView.Presenter {
+public class ProblemSubApp extends BaseSubApp<ProblemView> implements ProblemPresenter {
 
     public static final String NO_DEFINITIONS_SELECTED = "No definitions selected";
     private final ResourceOrigin origin;
@@ -77,68 +76,65 @@ public class ConfigProblemSubApp extends BaseSubApp<ConfigProblemView> implement
 
     private final RegistryFacade registryFacade;
 
-    private final ToolbarPresenter toolbarPresenter;
+    private final ProblemToolbarPresenter toolbarPresenter;
 
     private final LocationController locationController;
 
-    private ConfigProblemView.SourceType groupBy;
+    private final ProblemContainer container;
 
-    private FilterContext filter;
+    private ProblemView.SourceType groupBy = ProblemView.SourceType.source;
+
+    private String searchExpression;
+
+    private Problem.SourceType fromSourceType;
 
     private String currentLocation;
-
-    private ProblemContainer dataSource;
 
     private FileBrowserHelper fileBrowserHelper;
 
     @Inject
-    public ConfigProblemSubApp(
+    public ProblemSubApp(
             SubAppContext subAppContext,
-            ConfigProblemView view, ModuleRegistry moduleRegistry,
+            ProblemView view, ModuleRegistry moduleRegistry,
             RegistryFacade registryFacade,
-            ToolbarPresenter toolbarPresenter, ResourceOrigin origin, final LocationController locationController) {
+            ProblemToolbarPresenter toolbarPresenter,
+            ResourceOrigin origin, final LocationController locationController) {
         super(subAppContext, view);
         this.moduleRegistry = moduleRegistry;
         this.registryFacade = registryFacade;
         this.toolbarPresenter = toolbarPresenter;
         this.locationController = locationController;
         this.fileBrowserHelper = new FileBrowserHelper(getSubAppContext());
-        this.origin  = origin;
-        this.dataSource = new ProblemContainer();
+        this.origin = origin;
+        this.container = new ProblemContainer();
     }
 
     @Override
     protected void onSubAppStart() {
         super.onSubAppStart();
-        toolbarPresenter.setConfigPresenter(this);
+        toolbarPresenter.setProblemPresenter(this);
 
         getView().setToolbar(toolbarPresenter.start());
         getView().setPresenter(this);
-        groupBy(ConfigProblemView.SourceType.source);
+        updateView();
     }
 
     private String getCapitalizedPluralName(DefinitionType definitionType) {
         return StringUtils.capitalize(English.plural(definitionType.name()).toLowerCase());
     }
 
-//    @Override
-    public void groupBy(ConfigProblemView.SourceType type) {
-        this.groupBy = type;
-        updateView();
-    }
-
-    @Override public void groupBy(ConfigOverviewView.DefinitionAggregationType type) {
-
+    @Override
+    public void groupBy(ConfigOverviewView.DefinitionAggregationType type) {
+        //Do nothing
     }
 
     @Override
     public void filterBy(FilterContext context) {
-        this.filter = context;
-        updateView();
+        // Do nothing
     }
 
     @Override
-    public void showSelectedDefinitionFile() {
+    public void showSelectedDefinitionFile() {//TODO: need to have button to open
         try {
             this.fileBrowserHelper.showFile(origin.getByPath(currentLocation).openReader());
         } catch (IOException e) {
@@ -147,31 +143,66 @@ public class ConfigProblemSubApp extends BaseSubApp<ConfigProblemView> implement
     }
 
     @Override
-    public void showSelectedDefinitionInJcr() {
+    public void showSelectedDefinitionInJcr() {//TODO: need to have button to open
     }
 
     private void updateView() {
         final Map<String, Iterable<? extends DefinitionProvider>> providerMap = Maps.newLinkedHashMap();
-        List<Problem> problemList = new ArrayList<Problem>();
+        ListMultimap<String, Problem> problems = ArrayListMultimap.create();
+        for (final ModuleDefinition definition : moduleRegistry.getModuleDefinitions()) {
+            Collection<DefinitionProvider> definitionProviders = registryFacade.byModule(definition.getName());
+            for (DefinitionProvider defProvider : definitionProviders) {
+                List<Problem> problemList = defProvider.getErrorMessages();
+                for (Problem p : problemList) {
+                    if (!isMatchedSearchExpression(p)) {
+                        continue;
+                    }
 
-        switch (groupBy) {
-        case source:
-            for (final ModuleDefinition definition : moduleRegistry.getModuleDefinitions()) {
-                Collection<DefinitionProvider> definitionProviders = registryFacade.byModule(definition.getName());
-                for (DefinitionProvider defProvider : definitionProviders) {
-                    if (!defProvider.getErrorMessages().isEmpty()) {
-                        problemList.addAll(defProvider.getErrorMessages());
+                    switch (groupBy) {
+                    case source:
+                        problems.put(p.getSourceType().name(), p);
+                        break;
+                    case severity:
+                        if (fromSourceType == null || p.getSourceType() == fromSourceType) {
+                            problems.put(p.getSeverityLevel().name(), p);
+                        }
+                        break;
+                    default:
+                        break;
                     }
                 }
             }
-            break;
-
-        case severity:
-            break;
         }
 
-        getView().setDataSource(dataSource.createDataSource(problemList));
-        getView().setStatus(NO_DEFINITIONS_SELECTED);
+        getView().setDataSource(container.createDataSource(problems));
+        getView().setStatus(NO_DEFINITIONS_SELECTED);//TODO: Implement code for update status
         currentLocation = null;
+
+        getView().refresh();
+    }
+
+    @Override
+    public void groupBy(ProblemView.SourceType sourceType, Problem.SourceType fromSourceType) {
+        this.groupBy = sourceType;
+        this.fromSourceType = fromSourceType;
+        updateView();
+    }
+
+    @Override
+    public void searchBy(String searchExpression) {
+        this.searchExpression = searchExpression;
+        updateView();
+    }
+
+    private boolean isMatchedSearchExpression(Problem problem) {
+        if (StringUtils.isNotBlank(searchExpression) && problem != null) {
+            return StringUtils.containsIgnoreCase(problem.getElement(), searchExpression) ||
+                    StringUtils.containsIgnoreCase(problem.getMessage(), searchExpression) ||
+                    StringUtils.containsIgnoreCase(problem.getSeverityLevel().name(), searchExpression) ||
+                    StringUtils.containsIgnoreCase(problem.getType().name(), searchExpression) ||
+                    StringUtils.containsIgnoreCase(problem.getSourceType().name(), searchExpression);
+        }
+
+        return true;
     }
 }

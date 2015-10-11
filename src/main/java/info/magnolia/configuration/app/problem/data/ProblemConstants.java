@@ -1,5 +1,5 @@
 /**
- * This file Copyright (c) 2014 Magnolia International
+ * This file Copyright (c) 2015 Magnolia International
  * Ltd.  (http://www.magnolia-cms.com). All rights reserved.
  *
  *
@@ -31,25 +31,25 @@
  * intact.
  *
  */
-package info.magnolia.configuration.app.overview.data;
+package info.magnolia.configuration.app.problem.data;
 
-/** * Constants used in the data binding structures of the config app.
+import info.magnolia.configuration.app.overview.data.ConfigConstants;
 
- *
- * @see {@link DefinitionProviderConfigDataSource}.
+/**
+ * Constant for problem app.
  */
-public class ConfigConstants {
+public class ProblemConstants extends ConfigConstants {
+    public static final String GROUP_PLACEHOLDER_ITEM_ID = "##SUBSECTION##";
 
-    public static final String TITLE_PID = "title";
+    public static final String NUMBER_ITEM_SEPARATOR = "#";
 
-    public static final String MODULE_PID = "module";
+    public static final String PROBLEM_PID = "problem";
 
-    public static final String TYPE_PID = "type";
+    public static final String ELEMENT_PID = "element";
 
-    public static final String VALUE_PID = "value";
+    public static final String SOURCE_PID = "sourceType";
 
-    public static final String ORIGIN_PID = "origin";
+    public static final String TIMESTAMP_PID = "timestamp";
 
-    public static final String[] PID_ORDER = new String[] {TITLE_PID, VALUE_PID, TYPE_PID, MODULE_PID, ORIGIN_PID};
-
+    public static final String[] PID_ORDER = new String[]{TYPE_PID, PROBLEM_PID, ELEMENT_PID, MODULE_PID, SOURCE_PID, TIMESTAMP_PID};
 }

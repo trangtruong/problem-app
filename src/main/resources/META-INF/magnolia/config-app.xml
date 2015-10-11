@@ -9,40 +9,37 @@
   <version>${project.version}</version>
 
   <components>
-    <id>subapp</id>
-      <!--Sub app overview-->
-      <component>
-        <type>info.magnolia.configuration.app.overview.ConfigOverviewView</type>
-        <implementation>info.magnolia.configuration.app.overview.ConfigOverviewViewImpl</implementation>
-      </component>
+    <id>app-config-app-overview</id>
+    <component>
+      <type>info.magnolia.configuration.app.overview.ConfigOverviewView</type>
+      <implementation>info.magnolia.configuration.app.overview.ConfigOverviewViewImpl</implementation>
+    </component>
 
-      <component>
-        <type>info.magnolia.configuration.app.overview.toolbar.ToolbarPresenter</type>
-        <implementation>info.magnolia.configuration.app.overview.toolbar.ToolbarPresenter</implementation>
-      </component>
+    <component>
+      <type>info.magnolia.configuration.app.overview.toolbar.ToolbarPresenter</type>
+      <implementation>info.magnolia.configuration.app.overview.toolbar.ToolbarPresenter</implementation>
+    </component>
 
-      <component>
-        <type>info.magnolia.configuration.app.overview.toolbar.ToolbarView</type>
-        <implementation>info.magnolia.configuration.app.overview.toolbar.ToolbarViewImpl</implementation>
-      </component>
-
-      <!--Sub app problem-->
-      <component>
-        <type>info.magnolia.configuration.app.problem.ConfigProblemView</type>
-        <implementation>info.magnolia.configuration.app.problem.ConfigProblemViewImpl</implementation>
-      </component>
-
-      <component>
-        <type>info.magnolia.configuration.app.problem.ConfigProblemSubApp</type>
-        <implementation>info.magnolia.configuration.app.problem.ConfigProblemSubApp</implementation>
-      </component>
-
-      <component>
-        <type>info.magnolia.configuration.app.ConfigBaseApp</type>
-        <implementation>info.magnolia.configuration.app.ConfigBaseApp</implementation>
-      </component>
-
-
+    <component>
+      <type>info.magnolia.configuration.app.overview.toolbar.ToolbarView</type>
+      <implementation>info.magnolia.configuration.app.overview.toolbar.ToolbarViewImpl</implementation>
+    </component>
+  </components>
+  
+  <components>
+    <id>app-config-app-problem</id>
+    <component>
+      <type>info.magnolia.configuration.app.problem.toolbar.ProblemToolbarView</type>
+      <implementation>info.magnolia.configuration.app.problem.toolbar.ProblemToolbarViewImpl</implementation>
+    </component>
+    <component>
+      <type>info.magnolia.configuration.app.problem.toolbar.ProblemToolbarPresenter</type>
+      <implementation>info.magnolia.configuration.app.problem.toolbar.ProblemToolbarPresenter</implementation>
+    </component>
+    <component>
+      <type>info.magnolia.configuration.app.problem.ProblemView</type>
+      <implementation>info.magnolia.configuration.app.problem.ProblemViewImpl</implementation>
+    </component>
   </components>
 
   <dependencies>

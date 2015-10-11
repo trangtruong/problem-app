@@ -31,21 +31,41 @@
  * intact.
  *
  */
-package info.magnolia.configuration.app.problem;
+package info.magnolia.configuration.app.problem.toolbar;
 
-import info.magnolia.configuration.app.overview.ConfigPresenter;
-import info.magnolia.configuration.app.overview.toolbar.FilterContext;
+import info.magnolia.configuration.app.problem.ProblemPresenter;
+
+import javax.inject.Inject;
 
 /**
- * ConfigPresenter.
+ * ToolbarPresenter.
  */
-public interface ConfigProblemPresenter extends ConfigPresenter {
+public class ProblemToolbarPresenter implements ProblemToolbarView.Callback {
 
-    void groupBy(ConfigProblemView.SourceType type);
+    private ProblemToolbarView view;
+    private ProblemPresenter problemPresenter;
 
-    void filterBy(FilterContext context);
+    @Inject
+    public ProblemToolbarPresenter(ProblemToolbarView view) {
+        this.view = view;
+    }
 
-    void showSelectedDefinitionFile();
+    public void setProblemPresenter(ProblemPresenter problemPresenter) {
+        this.problemPresenter = problemPresenter;
+    }
 
-    void showSelectedDefinitionInJcr();
+    public ProblemToolbarView start() {
+        this.view.setCallback(this);
+        return this.view;
+    }
+
+    @Override
+    public void updateGroupBy() {
+        problemPresenter.groupBy(view.getGroupBy(), view.getFrom());
+    }
+
+    @Override
+    public void onSearch(String searchTextExpression) {
+        problemPresenter.searchBy(searchTextExpression);
+    }
 }

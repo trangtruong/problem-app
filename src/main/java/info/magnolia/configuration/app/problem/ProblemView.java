@@ -1,5 +1,5 @@
 /**
- * This file Copyright (c) 2014 Magnolia International
+ * This file Copyright (c) 2015 Magnolia International
  * Ltd.  (http://www.magnolia-cms.com). All rights reserved.
  *
  *
@@ -31,25 +31,34 @@
  * intact.
  *
  */
-package info.magnolia.configuration.app.overview.data;
+package info.magnolia.configuration.app.problem;
 
-/** * Constants used in the data binding structures of the config app.
+import info.magnolia.configuration.app.problem.toolbar.ProblemToolbarView;
+import info.magnolia.ui.api.view.View;
 
- *
- * @see {@link DefinitionProviderConfigDataSource}.
+import com.vaadin.data.Container;
+
+/**
+ * Config problem sub-app view interface.
  */
-public class ConfigConstants {
+public interface ProblemView extends View {
 
-    public static final String TITLE_PID = "title";
+    void setDataSource(Container dataSource);
 
-    public static final String MODULE_PID = "module";
+    void setPresenter(ProblemPresenter presenter);
 
-    public static final String TYPE_PID = "type";
+    void setStatus(String location);
 
-    public static final String VALUE_PID = "value";
+    void setToolbar(ProblemToolbarView toolbarView);
 
-    public static final String ORIGIN_PID = "origin";
+    void refresh();
 
-    public static final String[] PID_ORDER = new String[] {TITLE_PID, VALUE_PID, TYPE_PID, MODULE_PID, ORIGIN_PID};
+    /**
+     * Possible problem data sorting options.
+     */
+    enum SourceType {
+        source,
+        severity,
+    }
 
 }

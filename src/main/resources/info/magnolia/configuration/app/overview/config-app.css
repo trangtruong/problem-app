@@ -27,6 +27,7 @@
 .header *:focus {
     outline: none;
 }
+
 .toolbar-layout[width-range~="0-1000px"] .caption-label {
     display: none;
 }
@@ -100,19 +101,25 @@
 .v-table-row.invalid .v-table-icon-element, .v-table-row-odd.invalid .v-table-icon-element {
     color: #9a3332;
 }
+
 /*.v-table-generated-row .v-table-cell-wrapper {*/
-    /*border-bottom: 1px solid #E0E0E0;*/
-    /*font-weight: bold;*/
+/*border-bottom: 1px solid #E0E0E0;*/
+/*font-weight: bold;*/
 /*}*/
 
 /*.v-table-generated-row .gwt-CheckBox {*/
-    /*display: none;*/
+/*display: none;*/
 /*}*/
 
 /*.v-table-generated-row .v-table-cell-wrapper {*/
-    /*padding-left: 0 !important;*/
+/*padding-left: 0 !important;*/
 /*}*/
 
 /*.v-table-generated-row .v-table-cell-content {*/
-    /*border: none !important;*/
+/*border: none !important;*/
 /*}*/
+
+.problem-layout .v-table-cell-wrapper {
+    height: auto !important;
+    white-space: normal !important;
+}
