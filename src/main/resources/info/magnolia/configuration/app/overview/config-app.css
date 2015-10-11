@@ -135,7 +135,7 @@
 }
 
 .problem-layout .v-table-generated-row .v-table-cell-content {
-    border-bottom: 1px solid #848484;
+    border-bottom: 1px solid #848484 !important;
     padding-top: 10px;
 }
 
